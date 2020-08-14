@@ -4,42 +4,36 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
-const { json } = require('body-parser');
 const app = express();
+
+const authRoutes = require('./routes/authRoutes');
+const { checkUser, requireAuth } = require('./middleware/authMiddleware');
+
 
 const PORT = process.env.PORT || 3333;
 
+// middlewares
 app.use(cors());
-
 app.use(bodyParser.json());
-
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(express.json());
+app.use(cookieParser());
 app.use(morgan('dev'));
-
 app.use(express.static('public'));
 
+// view engine
 app.set('view engine', 'ejs');
 
-app.get('/test', (req, res) => {
-    res.send({
-        greetings: 'Hello World !!!'
-    })
-});
 
-app.get('/', (req, res) => {
-    res.render('home');
-});
-
-app.get('/login', (req, res) => {
-    res.render('login');
-});
-
-app.get('/signup', (req, res) => {
-    res.render('signup');
-});
+// routes
+app.get('/test', (req, res) => { res.send({ greetings: 'Hello World !!!' })});
+app.get('*', checkUser);
+app.get('/', (req, res) => res.render('home'));
+app.get('/smoothies', requireAuth, (req, res) => res.render('smoothies'));
+app.use(authRoutes);
 
 
 app.listen(PORT, () => {
