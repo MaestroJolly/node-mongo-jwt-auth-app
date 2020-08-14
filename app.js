@@ -35,8 +35,12 @@ app.get('/', (req, res) => res.render('home'));
 app.get('/smoothies', requireAuth, (req, res) => res.render('smoothies'));
 app.use(authRoutes);
 
+// database connection
+const dbURI = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@cluster0.akcvj.mongodb.net/${process.env.MONGODB_NAME}`;
 
-app.listen(PORT, () => {
-    console.log(`Application is listening to PORT: ${PORT}`);
-})
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }).then((response) => {
+    app.listen(PORT, () => { console.log(`Application is listening to PORT: ${PORT}`); });
+}).catch((error) => {
+    console.log(error);
+});
 
